@@ -1,0 +1,1 @@
+export const imageExtensionRegex = /\.(jpg|jpeg|png)$/;

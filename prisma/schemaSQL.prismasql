@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+///////////////////#region Tenants
+model Tenants {
+  id            Int             @id @default(autoincrement())
+  username      String
+  password      String
+  title        String
+  entity        String
+  entity_ref    Int
+  created_at    DateTime        @default(now())
+  created_by    Int?
+  modify_at     DateTime?
+  modify_by     Int?
+  app_action    Int             @default(1)
+  RefreshTokens RefreshTokens[]
+  Plans         Plans[]
+  Monitorings   Monitorings[]
+
+  @@map("Tenants")
+}
+
+model RefreshTokens {
+  id         Int      @id @default(autoincrement())
+  token      String   @unique
+  tenant     Tenants  @relation(fields: [tenant_ref], references: [id])
+  tenant_ref Int
+  expires_at DateTime
+  created_at DateTime @default(now())
+  status     Boolean  @default(true)
+
+  @@map("RefreshTokens")
+}
+
+///////////////////#endregion
+
+///////////////////#region Users
+model Users {
+  id           Int         @id @default(autoincrement())
+  tenant_ref   Int?
+  firstname    String
+  lastname     String
+  gender       String?
+  avatar       String?
+  mobile       String?
+  nationalCode String?
+  created_at   DateTime    @default(now())
+  created_by   Int?
+  modify_at    DateTime?
+  modify_by    Int?
+  app_action   Int         @default(1)
+  Employees    Employees[]
+
+  @@map("Users")
+}
+
+///////////////////#endregion
+
+///////////////////#region Companies
+model Companies {
+  id           Int         @id @default(autoincrement())
+  tenant_ref   Int?
+  title        String
+  nationalCode String
+  logo         String?
+  created_at   DateTime    @default(now())
+  created_by   Int?
+  modify_at    DateTime?
+  modify_by    Int?
+  app_action   Int         @default(1)
+  Employees    Employees[]
+
+  @@map("Companies")
+}
+
+///////////////////#endregion
+
+///////////////////#region Plan
+model Plans {
+  id         Int       @id @default(autoincrement())
+  tenant     Tenants   @relation(fields: [tenant_ref], references: [id])
+  tenant_ref Int
+  plan_ref   String
+  created_at DateTime  @default(now())
+  created_by Int?
+  modify_at  DateTime?
+  modify_by  Int?
+  app_action Int       @default(1)
+
+  @@map("Plans")
+}
+
+///////////////////#endregion
+
+///////////////////#region Employee
+model Employees {
+  id          Int       @id @default(autoincrement())
+  company     Companies @relation(fields: [company_ref], references: [id])
+  company_ref Int
+  user        Users     @relation(fields: [user_ref], references: [id])
+  user_ref    Int
+  created_at  DateTime  @default(now())
+  created_by  Int?
+  modify_at   DateTime?
+  modify_by   Int?
+  app_action  Int       @default(1)
+
+  @@map("Employees")
+}
+
+///////////////////#endregion
+
+///////////////////#region Monitoring
+model Monitorings {
+  id         Int       @id @default(autoincrement())
+  tenant     Tenants   @relation(fields: [tenant_ref], references: [id])
+  tenant_ref Int
+  title       String?
+  data       String
+  created_at DateTime  @default(now())
+  created_by Int?
+  modify_at  DateTime?
+  modify_by  Int?
+  app_action Int       @default(1)
+
+  @@map("Monitorings")
+}
+
+///////////////////#endregion
+
+///////////////////#region Chats
+model Chats {
+  id             Int            @id @default(autoincrement())
+  fromEntity     String
+  fromEntity_ref Int
+  toEntity       String
+  toEntity_ref   Int
+  created_at     DateTime       @default(now())
+  created_by     Int?
+  modify_at      DateTime?
+  modify_by      Int?
+  app_action     Int            @default(1)
+  ChatMessages   ChatMessages[]
+
+  @@map("Chats")
+}
+
+model ChatMessages {
+  id         Int       @id @default(autoincrement())
+  chat       Chats     @relation(fields: [chat_ref], references: [id])
+  chat_ref   Int
+  message    String?
+  file       String?
+  created_at DateTime  @default(now())
+  created_by Int?
+  modify_at  DateTime?
+  modify_by  Int?
+  app_action Int       @default(1)
+
+  @@map("ChatMessages")
+}
+
+///////////////////#endregion
+
+///////////////////#region Base
+model Products {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  created_at  DateTime  @default(now())
+  created_by  Int
+  modify_at   DateTime?
+  modify_by   Int?
+  app_action  Int       @default(1)
+
+  @@map("Products")
+}
+
+///////////////////#endregion
