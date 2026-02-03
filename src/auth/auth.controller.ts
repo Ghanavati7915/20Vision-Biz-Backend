@@ -47,8 +47,8 @@ export class AuthController {
   @ApiBody({ type: RegisterCompanyDto })
   @ApiResponse({ status: 200, description: 'Register successful' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async registerCompany(@Request() req,@Body() payload: RegisterCompanyDto) {
-    return this.authService.registerCompany(req.user.id , payload);
+  async registerCompany(@Request() req, @Body() payload: RegisterCompanyDto) {
+    return this.authService.registerCompany(req.user.sub, payload);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -60,7 +60,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtRefreshGuard)
-  @Post('refresh')
+  @Post('refresh2')
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiBody({ type: RefreshTokenDto })
   @ApiResponse({ status: 200, description: 'Token refreshed' })
@@ -76,6 +76,7 @@ export class AuthController {
   async userInfo(@Request() req) {
     return {
       id: req.user.id,
+      sub: req.user.sub,
       userName: req.user.userName,
       firstName: req.user.firstName,
       lastName: req.user.lastName,

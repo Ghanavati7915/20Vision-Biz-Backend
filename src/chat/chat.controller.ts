@@ -22,23 +22,23 @@ import { ChatCreateDto, ChatMessageCreateDto } from './dto/chat.dto';
 export class ChatController {
   constructor(private readonly chatService: ChatService) { }
 
-    //#region Create Chat
+  //#region Create Chat
   @Post()
   @ApiOperation({ summary: 'Create Chat' })
   @ApiResponse({ status: 200, description: 'Chat Created Success' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  create(@Request() req,@Body() payload: ChatCreateDto) {
-    return this.chatService.create(req.user.sub,req.user.id,payload);
+  create(@Request() req, @Body() payload: ChatCreateDto) {
+    return this.chatService.create(req.user.id, req.user.sub, payload);
   }
   //#endregion
 
-    //#region Create Chat Message
+  //#region Create Chat Message
   @Post('message')
   @ApiOperation({ summary: 'Create Chat Message' })
   @ApiResponse({ status: 200, description: 'Chat Message Created Success' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  createMessage(@Request() req,@Body() payload: ChatMessageCreateDto) {
-    return this.chatService.createMessage(req.user.sub,req.user.id, payload);
+  createMessage(@Request() req, @Body() payload: ChatMessageCreateDto) {
+    return this.chatService.createMessage(req.user.id, req.user.sub, payload);
   }
   //#endregion
 
@@ -49,7 +49,7 @@ export class ChatController {
   @ApiResponse({ status: 404, description: 'Chat not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   getAll(@Request() req) {
-    return this.chatService.getAll(req.user.sub);
+    return this.chatService.getAll(req.user.id);
   }
   //#endregion
 
@@ -59,8 +59,8 @@ export class ChatController {
   @ApiResponse({ status: 200, description: 'Chat Data' })
   @ApiResponse({ status: 404, description: 'Chat not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  getByID(@Request() req,@Param('id') id: number) {
-    return this.chatService.getByID(req.user.sub,id);
+  getByID(@Request() req, @Param('id') id: number) {
+    return this.chatService.getByID(req.user.id, id);
   }
   //#endregion
 

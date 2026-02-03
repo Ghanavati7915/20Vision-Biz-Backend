@@ -9,6 +9,8 @@ import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from './interfaces/token-payload.interface';
 import { RegisterCompanyDto, RegisterUserDto } from './dto/register.dto';
 import { Entity } from 'src/common/enums/enums';
+import type { StringValue } from "ms";
+
 
 @Injectable()
 export class AuthService {
@@ -37,7 +39,7 @@ export class AuthService {
   async login(mobile: string, password: string) {
     try {
       const tenant = await this.prisma.tenants.findFirst({
-        where: { username:mobile, app_action: 1 },
+        where: { username: mobile, app_action: 1 },
       });
 
       if (!tenant) throw new GoneException('اطلاعات صحیح نیست');
@@ -119,12 +121,12 @@ export class AuthService {
     }
   }
 
-    async registerCompany(userId :number, { nationalCode, title }: RegisterCompanyDto) {
+  async registerCompany(userId: number, { nationalCode, title }: RegisterCompanyDto) {
     try {
 
       //#region Check Company 
       const company = await this.prisma.companies.findFirst({
-        where: { nationalCode , app_action: 1 },
+        where: { nationalCode, app_action: 1 },
       });
       if (company) throw new GoneException('این شناسه ملی قبلاً ثبت شده است');
       //#endregion
@@ -141,7 +143,7 @@ export class AuthService {
         data: {
           title,
           nationalCode,
-          created_by:userId,
+          created_by: userId,
           app_action: 1,
         },
       });
@@ -151,11 +153,11 @@ export class AuthService {
       const newTenant = await this.prisma.tenants.create({
         data: {
           username: nationalCode,
-          password : '123' ,
+          password: '123',
           title,
           entity: Entity.Company,
           entity_ref: newCompany.id,
-          created_by:userId,
+          created_by: userId,
           app_action: 1,
         },
       });
@@ -165,11 +167,14 @@ export class AuthService {
       });
       //#endregion
 
+      console.log('userId', userId);
+      console.log('newCompany.id', newCompany.id);
+
       //#region Connect Employee
-      const newEmployee = await this.prisma.employees.create({
+      const newEmployee = await this.prisma.employees.createMany({
         data: {
           company_ref: newCompany.id,
-          user_ref : userId,
+          user_ref: userId,
           app_action: 1,
         },
       });
@@ -179,7 +184,7 @@ export class AuthService {
       const _tenant = await this.prisma.tenants.findFirst({
         where: {
           entity_ref: userId,
-          entity :  Entity.Personal,
+          entity: Entity.Personal,
           app_action: 1,
         },
       });
@@ -188,6 +193,7 @@ export class AuthService {
       const tokens = await this.getTokens(_tenant);
       return tokens;
     } catch (e) {
+      console.log(e);
       if (e instanceof GoneException) {
         throw e;
       }
@@ -199,8 +205,9 @@ export class AuthService {
     let Tokens: any[] = [];
 
     //#region Access Expire
-    const accessExpiresIn = this.configService.get<string>('JWT_EXPIRES_IN'); // مثلاً '900s'
-    const refreshExpiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'); // مثلاً '7d'
+    const accessExpiresIn = this.configService.get<StringValue>('JWT_EXPIRES_IN');
+    const refreshExpiresIn = this.configService.get<StringValue>('JWT_REFRESH_EXPIRES_IN');
+
     if (!accessExpiresIn || !refreshExpiresIn) {
       throw new Error('Missing JWT_EXPIRES_IN or JWT_REFRESH_EXPIRES_IN in config');
     }
@@ -218,7 +225,7 @@ export class AuthService {
     });
     if (user) {
 
-          //#region User
+      //#region User
       let payload: TokenPayload = {
         id: tenant.id,
         sub: user.id,
@@ -232,11 +239,11 @@ export class AuthService {
       }
       const [accessToken, refreshToken] = await Promise.all([
         this.jwtService.signAsync(payload, {
-          secret: this.configService.get<string>('JWT_SECRET'),
+          secret: this.configService.get<string>('JWT_SECRET')!,
           expiresIn: accessExpiresIn,
         }),
         this.jwtService.signAsync(payload, {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+          secret: this.configService.get<string>('JWT_REFRESH_SECRET')!,
           expiresIn: refreshExpiresIn,
         }),
       ]);
@@ -254,47 +261,47 @@ export class AuthService {
 
       //#region Company
       const employees = await this.prisma.employees.findMany({
-          where: { user_ref: user.id, app_action: 1 },
-          select: {
-            company: true
-          }
-        });
-        if (employees) {
-          for (const emp of employees) {
-            let payload: TokenPayload = {
-        id: emp.company.tenant_ref ?  emp.company.tenant_ref : 0,
-        sub: emp.company.id,
-        isPersonal: false,
-        userName: emp.company.nationalCode,
-        title: emp.company.title,
-        firstName: user.firstname,
-        lastName: user.lastname,
-        avatar: emp.company.logo ? `${process.env.BACKEND_DOMAIN}/dl/${emp.company.logo}` : null,
-        permissions: []
-      }
-      const [accessToken, refreshToken] = await Promise.all([
-        this.jwtService.signAsync(payload, {
-          secret: this.configService.get<string>('JWT_SECRET'),
-          expiresIn: accessExpiresIn,
-        }),
-        this.jwtService.signAsync(payload, {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-          expiresIn: refreshExpiresIn,
-        }),
-      ]);
-      await this.updateRefreshToken(tenant.id, refreshToken);
-      Tokens.push({
-        access: accessToken,
-        refresh: refreshToken,
-        accessExpireDate,
-        refreshExpireDate,
-        title: payload.title,
-        isPersonal: payload.isPersonal,
-      })
-          }
+        where: { user_ref: user.id, app_action: 1 },
+        select: {
+          company: true
         }
+      });
+      if (employees) {
+        for (const emp of employees) {
+          let payload: TokenPayload = {
+            id: emp.company.tenant_ref ? emp.company.tenant_ref : 0,
+            sub: emp.company.id,
+            isPersonal: false,
+            userName: emp.company.nationalCode,
+            title: emp.company.title,
+            firstName: user.firstname,
+            lastName: user.lastname,
+            avatar: emp.company.logo ? `${process.env.BACKEND_DOMAIN}/dl/${emp.company.logo}` : null,
+            permissions: []
+          }
+          const [accessToken, refreshToken] = await Promise.all([
+            this.jwtService.signAsync(payload, {
+              secret: this.configService.get<string>('JWT_SECRET')!,
+              expiresIn: accessExpiresIn,
+            }),
+            this.jwtService.signAsync(payload, {
+              secret: this.configService.get<string>('JWT_REFRESH_SECRET')!,
+              expiresIn: refreshExpiresIn,
+            }),
+          ]);
+          await this.updateRefreshToken(tenant.id, refreshToken);
+          Tokens.push({
+            access: accessToken,
+            refresh: refreshToken,
+            accessExpireDate,
+            refreshExpireDate,
+            title: payload.title,
+            isPersonal: payload.isPersonal,
+          })
+        }
+      }
       //#endregion
-    }else{
+    } else {
       throw new Error('اطلاعات جهت دریافت توکن ها یافت نشد');
     }
     //#endregion
@@ -341,7 +348,9 @@ export class AuthService {
     const expires_at = new Date();
 
     // Get refresh token expiration time with null check
-    const refreshExpiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN');
+    const refreshExpiresIn =
+      this.configService.get<StringValue>('JWT_REFRESH_EXPIRES_IN');
+
     if (!refreshExpiresIn) {
       throw new Error('JWT_REFRESH_EXPIRES_IN is not defined in config');
     }
@@ -352,7 +361,9 @@ export class AuthService {
       throw new Error('Invalid JWT_REFRESH_EXPIRES_IN format');
     }
 
-    expires_at.setSeconds(expires_at.getSeconds() + expiresInSeconds);
+    expires_at.setSeconds(expires_at.getSeconds() + expiresInSeconds); expires_at.setTime(
+      expires_at.getTime() + this.parseExpiresIn(refreshExpiresIn)
+    );
 
     await this.prisma.refreshTokens.upsert({
       where: {
