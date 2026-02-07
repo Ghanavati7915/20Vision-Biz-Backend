@@ -6,6 +6,6 @@ export interface TokenPayload {
   avatar: any;
   permissions: string[];
   id: number;
-  sub:number;
-  isPersonal : boolean
+  userID: number;
+  isPersonal: boolean
 }

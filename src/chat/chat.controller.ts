@@ -28,7 +28,7 @@ export class ChatController {
   @ApiResponse({ status: 200, description: 'Chat Created Success' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   create(@Request() req, @Body() payload: ChatCreateDto) {
-    return this.chatService.create(req.user.id, req.user.sub, payload);
+    return this.chatService.create(req.user.id, req.user.userID, payload);
   }
   //#endregion
 
@@ -38,7 +38,7 @@ export class ChatController {
   @ApiResponse({ status: 200, description: 'Chat Message Created Success' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   createMessage(@Request() req, @Body() payload: ChatMessageCreateDto) {
-    return this.chatService.createMessage(req.user.id, req.user.sub, payload);
+    return this.chatService.createMessage(req.user.id, req.user.userID, payload);
   }
   //#endregion
 

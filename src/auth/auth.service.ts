@@ -228,7 +228,7 @@ export class AuthService {
       //#region User
       let payload: TokenPayload = {
         id: tenant.id,
-        sub: user.id,
+        userID: user.id,
         isPersonal: true,
         userName: tenant.username,
         title: `${user.firstname} ${user.lastname}`,
@@ -270,14 +270,14 @@ export class AuthService {
         for (const emp of employees) {
           let payload: TokenPayload = {
             id: emp.company.tenant_ref ? emp.company.tenant_ref : 0,
-            sub: emp.company.id,
+            userID: emp.company.id,
             isPersonal: false,
             userName: emp.company.nationalCode,
             title: emp.company.title,
             firstName: user.firstname,
             lastName: user.lastname,
             avatar: emp.company.logo ? `${process.env.BACKEND_DOMAIN}/dl/${emp.company.logo}` : null,
-            permissions: []
+            permissions: ['chat', 'priceMonitor']
           }
           const [accessToken, refreshToken] = await Promise.all([
             this.jwtService.signAsync(payload, {
