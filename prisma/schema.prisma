@@ -15,6 +15,7 @@ model Tenants {
   title         String
   entity        String
   entity_ref    Int
+  allowSharing  Boolean         @default(false)
   created_at    DateTime        @default(now())
   created_by    Int?
   modify_at     DateTime?
@@ -43,21 +44,30 @@ model RefreshTokens {
 
 ///////////////////#region Users
 model Users {
-  id           Int         @id @default(autoincrement())
-  tenant_ref   Int?
-  firstname    String
-  lastname     String
-  gender       String?
-  avatar       String?
-  mobile       String?
-  nationalCode String?
-  created_at   DateTime    @default(now())
-  created_by   Int?
-  modify_at    DateTime?
-  modify_by    Int?
-  app_action   Int         @default(1)
-  Employees    Employees[]
+  id             Int         @id @default(autoincrement())
+  entityType     String // Enum : EntityType |  نوع موجودیت (مخاطب/اصلی)
+  tenant_ref     Int?
+  titles         titles?     @relation(fields: [title_ref], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  title_ref      Int?
+  firstname      String
+  lastname       String
+  gender         String? // Enum : Gender | جنسیت
+  avatar         String?
+  mobile         String?
+  nationalCode   String?
+  ecoNumber      String? // کد اقتصادی
+  description    String?
+  isCustomer     Boolean     @default(false)
+  profileVersion Int         @default(1)
+  created_at     DateTime    @default(now())
+  created_by     Int?
+  modify_at      DateTime?
+  modify_by      Int?
+  app_action     Int         @default(1)
+  Employees      Employees[]
 
+  @@unique([tenant_ref, mobile, entityType, app_action])
+  @@unique([tenant_ref, nationalCode, entityType, app_action])
   @@map("Users")
 }
 
@@ -65,19 +75,171 @@ model Users {
 
 ///////////////////#region Companies
 model Companies {
-  id           Int         @id @default(autoincrement())
-  tenant_ref   Int?
-  title        String
-  nationalCode String
-  logo         String?
-  created_at   DateTime    @default(now())
-  created_by   Int?
-  modify_at    DateTime?
-  modify_by    Int?
-  app_action   Int         @default(1)
-  Employees    Employees[]
+  id             Int         @id @default(autoincrement())
+  entityType     String // Enum : EntityType |  نوع موجودیت (مخاطب/اصلی)
+  tenant_ref     Int?
+  titles         titles?     @relation(fields: [title_ref], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  title_ref      Int?
+  title          String
+  nationalCode   String
+  logo           String?
+  description    String?
+  insertNumber   String? // شماره ثبت
+  insertDate     String? // تاریخ ثبت
+  brand          String? // برند
+  shahabCode     String? // کد شهاب
+  ecoNumber      String? // کد اقتصادی
+  type           String? // Enum : CompanyType | نوع شرکت
+  stateType      String? // Enum : CompanyStateType | وضعیت شرکت
+  organType      String? // Enum : OrganType | نوع مالکیت شرکت
+  isCustomer     Boolean     @default(false)
+  profileVersion Int         @default(1)
+  created_at     DateTime    @default(now())
+  created_by     Int?
+  modify_at      DateTime?
+  modify_by      Int?
+  app_action     Int         @default(1)
+  Employees      Employees[]
 
+  @@unique([tenant_ref, nationalCode, entityType, app_action])
+  @@unique([tenant_ref, title, entityType, app_action])
   @@map("Companies")
+}
+
+///////////////////#endregion
+
+///////////////////#region Branches
+model Branches {
+  id                Int                 @id @default(autoincrement())
+  entity            String // Enum : Entity |  موجودیت
+  entity_ref        Int
+  code              String
+  title             String
+  bimeh_code        String?
+  bimeh_branch      String?
+  address           Address?            @relation(fields: [address_ref], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  address_ref       Int?
+  created_at        DateTime            @default(now())
+  created_by        Int
+  modify_at         DateTime?
+  modify_by         Int?
+  app_action        Int                 @default(1)
+  branchPhones      BranchPhones[]
+  branchBanks       BranchBanks[]
+  branchDepartments BranchDepartments[]
+  branchFields      BranchFields[]
+  branchModels      BranchModels[]
+
+  @@map("Branches")
+}
+
+// حوزه های کاری شعبه
+
+model BranchFields {
+  id                Int            @id @default(autoincrement())
+  branches          Branches       @relation(fields: [branch_ref], references: [id])
+  branch_ref        Int
+  jobFieldTitle     JobFieldTitles @relation(fields: [jobFieldTitle_ref], references: [id])
+  jobFieldTitle_ref Int
+  created_at        DateTime       @default(now())
+  created_by        Int
+  modify_at         DateTime?
+  modify_by         Int?
+  app_action        Int            @default(1)
+
+  @@map("BranchFields")
+}
+
+// مدل های شعبه
+model BranchModels {
+  id         Int       @id @default(autoincrement())
+  branches   Branches  @relation(fields: [branch_ref], references: [id])
+  branch_ref Int
+  model      String // Enum : BranchTypeModels | انتخاب مدل
+  created_at DateTime  @default(now())
+  created_by Int
+  modify_at  DateTime?
+  modify_by  Int?
+  app_action Int       @default(1)
+
+  @@map("BranchModels")
+}
+
+model BranchDepartments {
+  id         Int       @id @default(autoincrement())
+  branches   Branches  @relation(fields: [branch_ref], references: [id])
+  branch_ref Int
+  parent_ref Int?
+  title      String // عنوان
+  created_at DateTime  @default(now())
+  created_by Int
+  modify_at  DateTime?
+  modify_by  Int?
+  app_action Int       @default(1)
+
+  @@map("BranchDepartments")
+}
+
+model BranchPhones {
+  id         Int       @id @default(autoincrement())
+  branches   Branches  @relation(fields: [branch_ref], references: [id])
+  branch_ref Int
+  title      String // عنوان
+  phone      String // شماره
+  type       String // Enum : PhoneTypes | نوع تلفن ها
+  operator   String // Enum : PhoneOperators | نوع اپراتور
+  created_at DateTime  @default(now())
+  created_by Int
+  modify_at  DateTime?
+  modify_by  Int?
+  app_action Int       @default(1)
+
+  @@map("BranchPhones")
+}
+
+model BranchBanks {
+  id                     Int       @id @default(autoincrement())
+  banks                  Banks     @relation(fields: [bank_ref], references: [id])
+  bank_ref               Int
+  branches               Branches  @relation(fields: [branch_ref], references: [id])
+  branch_ref             Int
+  bankbranch             String?
+  currency               String // Enum : CurrencyTypes | نوع ارز
+  type                   String // Enum : BankAccountTypes | نوع حساب
+  title                  String // عنوان حساب
+  accountNo              String? // شماره حساب
+  shabaNo                String? // شماره شبا
+  internationalAccountNo String? // شماره حساب بانکی بین‌المللی
+  created_at             DateTime  @default(now())
+  created_by             Int
+  modify_at              DateTime?
+  modify_by              Int?
+  app_action             Int       @default(1)
+
+  @@map("BranchBanks")
+}
+
+model Address {
+  id          Int        @id @default(autoincrement())
+  cities      Cities?    @relation(fields: [city_ref], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  city_ref    Int?
+  village     String?
+  street      String?
+  alley       String?
+  alleyNo     String?
+  building    String?
+  postalCode  String?
+  floor       String?
+  plate       String?
+  description String?
+  created_at  DateTime   @default(now())
+  created_by  Int
+  modify_at   DateTime?
+  modify_by   Int?
+  app_action  Int        @default(1)
+  branches    Branches[]
+
+  @@map("Address")
 }
 
 ///////////////////#endregion
@@ -167,12 +329,12 @@ model ChatMessages {
 
 ///////////////////#endregion
 
-///////////////////#region Base
+///////////////////#region Products
 model Products {
   id          Int       @id @default(autoincrement())
   title       String
   description String?
-  properties String?
+  properties  String?
   created_at  DateTime  @default(now())
   created_by  Int
   modify_at   DateTime?
@@ -180,6 +342,69 @@ model Products {
   app_action  Int       @default(1)
 
   @@map("Products")
+}
+
+///////////////////#endregion
+///////////////////#region Base
+model Cities {
+  id         Int       @id @default(autoincrement())
+  title      String
+  type       String // Enum : CityType | نوع موجودیت شهر
+  parent_ref Int
+  created_at DateTime  @default(now())
+  created_by Int
+  modify_at  DateTime?
+  modify_by  Int?
+  app_action Int       @default(1)
+  addresses  Address[]
+
+  @@map("Cities")
+}
+
+model Banks {
+  id          Int           @id @default(autoincrement())
+  title       String
+  description String
+  created_at  DateTime      @default(now())
+  created_by  Int
+  modify_at   DateTime?
+  modify_by   Int?
+  app_action  Int           @default(1)
+  branchBanks BranchBanks[]
+
+  @@map("Banks")
+}
+
+// حوزه های کاری
+model JobFieldTitles {
+  id           Int            @id @default(autoincrement())
+  title        String
+  description  String?
+  parent_ref   Int?
+  created_at   DateTime       @default(now())
+  created_by   Int
+  modify_at    DateTime?
+  modify_by    Int?
+  app_action   Int            @default(1)
+  BranchFields BranchFields[]
+
+  @@map("JobFieldTitles")
+}
+
+// عناوین و القاب
+model titles {
+  id         Int         @id @default(autoincrement())
+  title      String
+  gender     String // Enum : Gender | جنسیت
+  created_at DateTime    @default(now())
+  created_by Int
+  modify_at  DateTime?
+  modify_by  Int?
+  app_action Int         @default(1)
+  users      Users[]
+  companies  Companies[]
+
+  @@map("titles")
 }
 
 ///////////////////#endregion

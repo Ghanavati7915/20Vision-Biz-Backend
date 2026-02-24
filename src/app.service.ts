@@ -3,13 +3,17 @@ import { BaseService } from './base/base.service';
 
 @Injectable()
 export class AppService implements OnApplicationBootstrap {
-  constructor() { }
+  constructor(private readonly baseService: BaseService) { }
 
   getHello(): string {
-    return 'Hello World!';
+    return '20Vision Biz Backend!';
   }
 
   async onApplicationBootstrap() {
-    console.log('Hello World')
+    await this.baseService.seedCitiesIfNotExists();
+    await this.baseService.seedBanksIfNotExists();
+    await this.baseService.seedJobFieldsIfNotExists();
+    await this.baseService.seedTitlesIfNotExists();
+    console.log('20Vision Biz Backend Running')
   }
 }

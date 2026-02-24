@@ -8,7 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { TokenPayload } from './interfaces/token-payload.interface';
 import { RegisterCompanyDto, RegisterUserDto } from './dto/register.dto';
-import { Entity } from 'src/common/enums/enums';
+import { Entity, EntityType } from 'src/common/enums/enums';
 import type { StringValue } from "ms";
 
 
@@ -77,6 +77,7 @@ export class AuthService {
       //#region Create User
       const newUser = await this.prisma.users.create({
         data: {
+          entityType: EntityType.Contact,
           mobile,
           firstname,
           lastname,
@@ -141,6 +142,7 @@ export class AuthService {
       //#region Create Company
       const newCompany = await this.prisma.companies.create({
         data: {
+          entityType: Entity.Company,
           title,
           nationalCode,
           created_by: userId,

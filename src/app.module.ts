@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaService } from '../prisma/prisma.service';
 import { BaseModule } from './base/base.module';
 import { UserModule } from './user/user.module';
+import { ContactModule } from './contact/contact.module';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { ChatModule } from './chat/chat.module';
 import { UploadModule } from './upload/upload.module';
@@ -22,6 +23,7 @@ import { AppService } from './app.service';
     UserModule,
     ChatModule,
     MonitoringModule,
+    ContactModule,
     UploadModule,
   ],
   providers: [
@@ -34,5 +36,5 @@ import { AppService } from './app.service';
     Reflector,
   ],
 })
-export class AppModule { 
+export class AppModule {
 }

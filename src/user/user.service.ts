@@ -9,6 +9,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { UserDto } from './dto/user.dto';
 import { isNationalCode } from '../common/methods/validator';
+import { ToggleStateDto } from 'src/common/DTOs/shared';
 
 @Injectable()
 export class UserService {
@@ -144,6 +145,40 @@ export class UserService {
       }
       console.log(e)
       throw new GoneException('مشکلی در ثبت رخ داده است');
+    }
+  }
+  //#endregion
+
+  //#region Toggle Share
+  async toggleShare(
+    tenantId: number,
+    editor: number,
+    payload: ToggleStateDto,
+  ): Promise<{ message: string; statusCode: number }> {
+    try {
+      const result = await this.prisma.tenants.updateMany({
+        where: {
+          id: tenantId,
+          app_action: 1,
+        },
+        data: {
+          allowSharing: payload.state,
+          modify_by: editor,
+          modify_at: new Date(),
+        },
+      });
+
+      if (result.count === 0) {
+        throw new NotFoundException('مستاجر با این اطلاعات یافت نشد');
+      }
+
+      return {
+        message: 'وضعیت اشتراک گذاری با موفقیت تغییر یافت',
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new GoneException('مشکلی در عملیات رخ داده است');
     }
   }
   //#endregion

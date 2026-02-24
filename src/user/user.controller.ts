@@ -12,6 +12,7 @@ import {
 import { UserService } from './user.service';
 import { UserAvatarDto, UserDto } from './dto/user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ToggleStateDto } from 'src/common/DTOs/shared';
 
 @ApiTags('User')
 @ApiBearerAuth('JWT-auth')
@@ -54,5 +55,15 @@ export class UserController {
   }
   //#endregion
 
+  //#region Toggle Share State
+  @Patch('/toggleShare')
+  @ApiOperation({ summary: 'Toggle a Share State' })
+  @ApiResponse({ status: 201, description: 'Share State Toggled successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  toggleShare(@Request() req: any, @Body() payload: ToggleStateDto) {
+    return this.userService.toggleShare(req.user.id, req.user.userID, payload);
+  }
+  //#endregion
 
 }
