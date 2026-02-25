@@ -13,7 +13,7 @@ export class AuthService {
       private prisma: PrismaService,
       private jwtService: JwtService,
       private configService: ConfigService,
-   ) {}
+   ) { }
 
    async validateUser(username: string, pass: string) {
       try {
@@ -265,7 +265,7 @@ export class AuthService {
                   firstName: user.firstname,
                   lastName: user.lastname,
                   avatar: emp.company.logo ? `${process.env.BACKEND_DOMAIN}/dl/${emp.company.logo}` : null,
-                  permissions: ["chat", "priceMonitor","factor","product","contact"],
+                  permissions: ["chat", "priceMonitor", "factor", "product", "contact"],
                };
                const [accessToken, refreshToken] = await Promise.all([
                   this.jwtService.signAsync(payload, {
@@ -318,6 +318,7 @@ export class AuthService {
       }
 
       const tokens = await this.getTokens(tenant);
+      console.log('tokens : ', tokens)
       // await this.updateRefreshToken(tenant.id, tokens.refreshToken);
       return tokens;
    }

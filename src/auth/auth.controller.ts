@@ -12,7 +12,7 @@ import { RegisterCompanyDto, RegisterUserDto } from "./dto/register.dto";
 @ApiTags("Authentication")
 @Controller("auth")
 export class AuthController {
-   constructor(private authService: AuthService) {}
+   constructor(private authService: AuthService) { }
 
    @Public()
    @Post("login")
@@ -52,7 +52,7 @@ export class AuthController {
    }
 
    @UseGuards(JwtRefreshGuard)
-   @Post("refresh2")
+   @Post("refreshToken")
    @ApiOperation({ summary: "Refresh access token" })
    @ApiBody({ type: RefreshTokenDto })
    @ApiResponse({ status: 200, description: "Token refreshed" })

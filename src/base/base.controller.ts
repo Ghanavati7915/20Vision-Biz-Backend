@@ -1,17 +1,29 @@
-import { Controller, UseGuards, Get, Param } from "@nestjs/common";
+import { Controller, UseGuards, Get, Request, Param, Body, Post } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { BaseService } from "./base.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { Public } from "../auth/decorators/public.decorator";
+import { CreateProductDto } from "./dto/base.dto";
 
 @ApiTags("Base")
 @ApiBearerAuth("JWT-auth")
 @Controller("base")
 @UseGuards(JwtAuthGuard)
 export class BaseController {
-   constructor(private readonly baseService: BaseService) {}
+   constructor(private readonly baseService: BaseService) { }
 
-   //#region Products
+   //#region Create Product
+   @Post("product")
+   @ApiOperation({ summary: "Create a Product" })
+   @ApiResponse({ status: 201, description: "Product created successfully" })
+   @ApiResponse({ status: 400, description: "Bad request" })
+   @ApiResponse({ status: 401, description: "Unauthorized" })
+   createProduct(@Request() req: any, @Body() payload: CreateProductDto) {
+      return this.baseService.createProduct(req.user.id, req.user.userID, payload);
+   }
+   //#endregion
+
+   //#region Get Products
    @Public()
    @Get("/products")
    @ApiOperation({ summary: "Get All Available Products" })
@@ -21,15 +33,15 @@ export class BaseController {
    }
    //#endregion
 
-  //#region Titles
-  @Public()
-  @Get("/titles")
-  @ApiOperation({ summary: "Get All Available Titles" })
-  @ApiResponse({ status: 200, description: "List of Titles" })
-  titles() {
-    return this.baseService.titles();
-  }
-  //#endregion
+   //#region Titles
+   @Public()
+   @Get("/titles")
+   @ApiOperation({ summary: "Get All Available Titles" })
+   @ApiResponse({ status: 200, description: "List of Titles" })
+   titles() {
+      return this.baseService.titles();
+   }
+   //#endregion
 
    //#region Company Search
    @Public()
