@@ -1,23 +1,23 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 
 export class RegisterUserDto {
-  @ApiProperty()
-  mobile: string;
+   @ApiProperty()
+   mobile: string;
 
-  @ApiProperty()
-  password: string;
+   @ApiProperty()
+   password: string;
 
-  @ApiProperty()
-  firstname: string;
+   @ApiProperty()
+   firstname: string;
 
-  @ApiProperty()
-  lastname: string;
+   @ApiProperty()
+   lastname: string;
 }
 
 export class RegisterCompanyDto {
-  @ApiProperty()
-  nationalCode: string;
+   @ApiProperty()
+   nationalCode: string;
 
-  @ApiProperty()
-  title: string;
+   @ApiProperty()
+   title: string;
 }

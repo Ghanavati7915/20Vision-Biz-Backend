@@ -203,7 +203,7 @@ model BranchBanks {
   bank_ref               Int
   branches               Branches  @relation(fields: [branch_ref], references: [id])
   branch_ref             Int
-  bankbranch             String?
+  bankBranch             String?
   currency               String // Enum : CurrencyTypes | نوع ارز
   type                   String // Enum : BankAccountTypes | نوع حساب
   title                  String // عنوان حساب

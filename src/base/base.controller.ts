@@ -1,42 +1,78 @@
-import {
-  Controller,
-  UseGuards, Get, Param,
-} from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { BaseService } from './base.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Public } from '../auth/decorators/public.decorator';
+import { Controller, UseGuards, Get, Param } from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { BaseService } from "./base.service";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { Public } from "../auth/decorators/public.decorator";
 
-@ApiTags('Base')
-@ApiBearerAuth('JWT-auth')
-@Controller('base')
+@ApiTags("Base")
+@ApiBearerAuth("JWT-auth")
+@Controller("base")
 @UseGuards(JwtAuthGuard)
 export class BaseController {
-  constructor(private readonly baseService: BaseService) { }
+   constructor(private readonly baseService: BaseService) {}
 
- //#region Products
+   //#region Products
+   @Public()
+   @Get("/products")
+   @ApiOperation({ summary: "Get All Available Products" })
+   @ApiResponse({ status: 200, description: "List of Products" })
+   products() {
+      return this.baseService.products();
+   }
+   //#endregion
+
+  //#region Titles
   @Public()
-  @Get('/products')
-  @ApiOperation({ summary: 'Get All Available Products' })
-  @ApiResponse({ status: 200, description: 'List of Products' })
-  products() {
-    return this.baseService.products();
+  @Get("/titles")
+  @ApiOperation({ summary: "Get All Available Titles" })
+  @ApiResponse({ status: 200, description: "List of Titles" })
+  titles() {
+    return this.baseService.titles();
   }
   //#endregion
 
-  //#region Company Search
-  @Public()
-  @Get('/company/search/:text')
-  @ApiOperation({ summary: 'Search In The Companies With NationalCode' })
-  @ApiResponse({ status: 200, description: 'List of Search Result' })
-  companySearch(@Param('text') text: string) {
-    return this.baseService.companySearch(text);
-  }
-  //#endregion
+   //#region Company Search
+   @Public()
+   @Get("/company/search/:text")
+   @ApiOperation({ summary: "Search In The Companies With NationalCode" })
+   @ApiResponse({ status: 200, description: "List of Search Result" })
+   companySearch(@Param("text") text: string) {
+      return this.baseService.companySearch(text);
+   }
+   //#endregion
 
+   //#region Cities
+   @Get("/countries")
+   @ApiOperation({ summary: "Get all Countries" })
+   @ApiResponse({ status: 200, description: "List of Countries" })
+   @ApiResponse({ status: 401, description: "Unauthorized" })
+   countriesGetAll() {
+      return this.baseService.countriesGetAll();
+   }
+
+   @Get("/provinces/:id")
+   @ApiOperation({ summary: "Get all Provinces" })
+   @ApiResponse({ status: 200, description: "List of Provinces" })
+   @ApiResponse({ status: 401, description: "Unauthorized" })
+   provincesGetAll(@Param("id") id: string) {
+      return this.baseService.provincesGetAll(+id);
+   }
+
+   @Get("/cities/:id")
+   @ApiOperation({ summary: "Get all Cities" })
+   @ApiResponse({ status: 200, description: "List of Cities" })
+   @ApiResponse({ status: 401, description: "Unauthorized" })
+   citiesGetAll(@Param("id") id: string) {
+      return this.baseService.citiesGetAll(+id);
+   }
+
+   @Public()
+   @Get("/city")
+   @ApiOperation({ summary: "Get all Cities From All Countries And All Provinces" })
+   @ApiResponse({ status: 200, description: "List of All Cities" })
+   @ApiResponse({ status: 401, description: "Unauthorized" })
+   cityGetAll() {
+      return this.baseService.cityGetAll();
+   }
+   //#endregion
 }
