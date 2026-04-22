@@ -70,6 +70,14 @@ export class FilterDto {
    @MaxLength(100)
    search?: string;
 
+   @ApiPropertyOptional({
+      description: "نوع فیلتر ( با توجه به فرم )",
+      example: "Sent",
+   })
+   @IsOptional()
+   @IsString()
+   type?: string;
+
    @ApiProperty({
       type: OrderDto,
       description: "تنظیمات مرتب‌سازی",

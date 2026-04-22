@@ -9,6 +9,7 @@ import { ContactModule } from "./contact/contact.module";
 import { MonitoringModule } from "./monitoring/monitoring.module";
 import { BranchModule } from "./branch/branch.module";
 import { ChatModule } from "./chat/chat.module";
+import { FactorModule } from "./factor/factor.module";
 import { UploadModule } from "./upload/upload.module";
 import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
 import { Reflector } from "@nestjs/core";
@@ -24,6 +25,7 @@ import { AppService } from "./app.service";
       UserModule,
       BranchModule,
       ChatModule,
+      FactorModule,
       MonitoringModule,
       ContactModule,
       UploadModule,

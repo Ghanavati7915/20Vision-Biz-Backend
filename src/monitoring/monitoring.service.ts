@@ -2,7 +2,6 @@ import { BadRequestException, ConflictException, GoneException, HttpStatus, Inje
 import { PrismaService } from "../../prisma/prisma.service";
 import { MonitorDto } from "./dto/monitoring.dto";
 import { Prisma } from "@prisma/client";
-
 @Injectable()
 export class MonitoringService {
    constructor(private prisma: PrismaService) {}

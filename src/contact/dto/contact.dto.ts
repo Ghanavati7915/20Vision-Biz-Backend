@@ -15,7 +15,7 @@ import {
    IsArray,
    ArrayUnique,
 } from "class-validator";
-import { Type,Transform } from "class-transformer";
+import { Type, Transform } from "class-transformer";
 
 export class ContactUserDto {
    @ApiProperty({
@@ -61,7 +61,7 @@ export class ContactUserDto {
       example: "0012345678",
       nullable: true,
    })
-   @Transform(({ value }) => value === "" ? undefined : value)
+   @Transform(({ value }) => (value === "" ? undefined : value))
    @IsOptional()
    @Matches(/^\d{10}$/, {
       message: "کد ملی باید دقیقاً ۱۰ رقم باشد",
@@ -95,7 +95,7 @@ export class ContactUserDto {
       example: "411111111111",
       nullable: true,
    })
-   @Transform(({ value }) => value === "" ? undefined : value)
+   @Transform(({ value }) => (value === "" ? undefined : value))
    @IsOptional()
    @IsString()
    @Length(12, 12)

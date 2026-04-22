@@ -1,9 +1,11 @@
-import { Controller, UseGuards, Get, Request, Param, Body, Post } from "@nestjs/common";
+import { Controller, UseGuards, Get, Request, Param, Body, Post, Put, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { BaseService } from "./base.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { Public } from "../auth/decorators/public.decorator";
-import { CreateProductDto } from "./dto/base.dto";
+import { CreateJobFieldTitleDto, CreateProductDto } from './dto/base.dto';
+import { FilterDto } from '../common/DTOs/shared';
+import { CreateDepartmentDto } from '../branch/dto/branch.dto';
 
 @ApiTags("Base")
 @ApiBearerAuth("JWT-auth")
@@ -20,6 +22,16 @@ export class BaseController {
    @ApiResponse({ status: 401, description: "Unauthorized" })
    createProduct(@Request() req: any, @Body() payload: CreateProductDto) {
       return this.baseService.createProduct(req.user.id, req.user.userID, payload);
+   }
+   //#endregion
+
+   //#region Update Product
+   @Put("/product/:id")
+   @ApiOperation({ summary: "Update Product" })
+   @ApiResponse({ status: 200, description: "Product Updated" })
+   @ApiResponse({ status: 401, description: "Unauthorized" })
+   updateProduct(@Request() req: any, @Param("id") id: string, @Body() payload: CreateProductDto) {
+      return this.baseService.updateProduct(req.user.userID, payload, +id);
    }
    //#endregion
 
@@ -87,4 +99,46 @@ export class BaseController {
       return this.baseService.cityGetAll();
    }
    //#endregion
+
+  //#region JobFieldTitle
+  //#region Create
+  @Post('/JobFieldTitle')
+  @ApiOperation({ summary: 'Create a new Job Field Titles' })
+  @ApiResponse({ status: 201, description: 'job Field Titles created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  create_jobFieldTitle(@Request() req: any, @Body() payload: CreateJobFieldTitleDto) {
+    return this.baseService.create_jobFieldTitle(req.user.userID, payload);
+  }
+  //#endregion
+  //#region Get
+  @Get('/JobFieldTitle')
+  @ApiOperation({ summary: 'Get all Job Field Titles' })
+  @ApiResponse({ status: 200, description: 'List of Job Field Titles' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  get_jobFieldTitle() {
+    return this.baseService.jobFieldTitleGetAll();
+  }
+  //#endregion
+  //#region Update
+  @Patch('/JobFieldTitle/:id')
+  @ApiOperation({ summary: 'Update a Job Field Titles' })
+  @ApiResponse({ status: 201, description: 'Job Field Titles updated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  update_jobFieldTitle(@Request() req: any, @Body() payload: CreateJobFieldTitleDto, @Param('id') id: string) {
+    return this.baseService.update_jobFieldTitle(req.user.userID,+id,payload);
+  }
+  //#endregion
+  //#region Delete
+  @Get('/JobFieldTitle/:id')
+  @ApiOperation({ summary: 'Delete a Job Field Titles' })
+  @ApiResponse({ status: 201, description: 'Job Field Titles deleted successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  delete_jobFieldTitle(@Request() req: any, @Param('id') id: string) {
+    return this.baseService.delete_jobFieldTitle(req.user.userID,+id);
+  }
+  //#endregion
+  //#endregion
 }

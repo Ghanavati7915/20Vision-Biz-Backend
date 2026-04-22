@@ -11,6 +11,9 @@ export class RegisterUserDto {
    firstname: string;
 
    @ApiProperty()
+   nationalCode: string;
+
+   @ApiProperty()
    lastname: string;
 }
 

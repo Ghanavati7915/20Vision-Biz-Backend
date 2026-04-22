@@ -53,7 +53,19 @@ export enum PhoneOperators {
    Rightell = "Rightell", // رایتل
 }
 //#endregion
-
+//#region نوع فاکتور
+export enum FactorType {
+  PreFactor = "PreFactor", //پیش فاکتور
+  Preview = "Preview",//پیش نمایش
+  Master = "Master",//رسمی
+}
+//#endregion
+//#region نوع سفارش
+export enum OrderType {
+  Sent = 'Sent', //ارسال شده ( خرید )
+  Received = 'Received',//دریافت شده ( فروش )
+}
+//#endregion
 //#region انواع ارز ها
 export enum CurrencyTypes {
    IRRial = "IRRial",
@@ -104,5 +116,12 @@ export enum BranchTypeModels {
    Factory = "Factory", // کارخانه
    WareHouse = "WareHouse", // انبار
    SaleOffice = "SaleOffice", // دفتر فروش
+}
+//#endregion
+
+//#region شبکه های اجتماعی
+export enum SocialApps {
+  Telegram = 'Telegram',
+  Instagram = 'Instagram',
 }
 //#endregion

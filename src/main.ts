@@ -52,10 +52,8 @@ async function bootstrap() {
          "JWT-refresh",
       )
       .build();
-
    const document = SwaggerModule.createDocument(app, config);
    SwaggerModule.setup("swagger", app, document);
-
-   await app.listen(1028);
+   await app.listen(1030);
 }
 bootstrap();

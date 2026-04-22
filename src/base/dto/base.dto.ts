@@ -13,3 +13,10 @@ export class CreateProductDto {
     properties?: string;
 
 }
+
+export class CreateJobFieldTitleDto {
+  @ApiProperty()
+  title: string;
+  @ApiProperty()
+  description?: string;
+}

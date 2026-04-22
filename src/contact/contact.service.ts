@@ -125,6 +125,102 @@ export class ContactService {
       }
    }
 
+
+  // ==============================
+  // User : Update
+  // ==============================
+  async updateUser(
+    tenantId: number,
+    editor: number,
+    payload: ContactUserDto,
+    id: number,
+  ): Promise<{ message: string; statusCode: number }> {
+    try {
+      const result = await this.prisma.users.updateMany({
+        where: {
+          id,
+          tenant_ref: tenantId,
+          entityType: EntityType.Contact,
+          app_action: 1,
+        },
+        data: {
+          title_ref: payload.title_ref,
+          firstname: payload.firstname,
+          lastname: payload.lastname,
+          gender: payload.gender,
+          mobile: payload.mobile,
+          nationalCode: payload.nationalCode,
+          ecoNumber: payload.ecoNumber,
+          description: payload.description,
+          modify_by: editor,
+          modify_at: new Date(),
+        },
+      });
+
+      if (result.count === 0) {
+        throw new NotFoundException("مخاطبی با این اطلاعات یافت نشد");
+      }
+
+      return {
+        message: "اطلاعات مشتری با موفقیت ویرایش یافت",
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new GoneException("مشکلی در عملیات رخ داده است");
+    }
+  }
+
+
+  // ==============================
+  // Company : Update
+  // ==============================
+  async updateCompany(
+    tenantId: number,
+    editor: number,
+    payload: ContactCompanyDto,
+    id: number,
+  ): Promise<{ message: string; statusCode: number }> {
+    try {
+      const result = await this.prisma.companies.updateMany({
+        where: {
+          id,
+          tenant_ref: tenantId,
+          entityType: EntityType.Contact,
+          app_action: 1,
+        },
+        data: {
+          title: payload.title,
+          nationalCode: payload.nationalCode,
+          type: payload.type,
+          organType: payload.organType,
+          stateType: payload.stateType,
+          shahabCode: payload.shahabCode,
+          brand: payload.brand,
+          insertDate: payload.insertDate,
+          insertNumber: payload.insertNumber,
+          ecoNumber: payload.ecoNumber,
+          description: payload.description,
+          modify_by: editor,
+          modify_at: new Date(),
+        },
+      });
+
+      if (result.count === 0) {
+        throw new NotFoundException("مخاطبی با این اطلاعات یافت نشد");
+      }
+
+      return {
+        message: "اطلاعات مشتری با موفقیت ویرایش یافت",
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new GoneException("مشکلی در عملیات رخ داده است");
+    }
+  }
+
+
    // ==============================
    // COMPANY : Toggle Customer State
    // ==============================
@@ -497,7 +593,7 @@ export class ContactService {
 
          const branch = await this.prisma.branches.findFirst({
             where: { entity_ref: id, entity: Entity.Personal, app_action: 1 },
-            select: { code: true, title: true },
+            select: { code: true, title: true,address:{include: {cities:true}} },
          });
 
          return { ...user, branch };
@@ -527,7 +623,7 @@ export class ContactService {
 
          const branch = await this.prisma.branches.findFirst({
             where: { entity_ref: id, entity: Entity.Company, app_action: 1 },
-            select: { code: true, title: true },
+            select: { code: true, title: true,address:{include: {cities:true}} },
          });
 
          return { ...company, branch };

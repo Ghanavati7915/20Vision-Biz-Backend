@@ -71,6 +71,7 @@ export class AuthController {
          userID: req.user.userID,
          isPersonal: req.user.isPersonal,
          userName: req.user.userName,
+        nationalCode: req.user.nationalCode,
          firstName: req.user.firstName,
          lastName: req.user.lastName,
          permissions: req.user.permissions,

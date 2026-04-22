@@ -50,7 +50,7 @@ export class AuthService {
       }
    }
 
-   async registerUser({ mobile, password, firstname, lastname }: RegisterUserDto) {
+   async registerUser({ mobile, password, firstname, lastname,nationalCode }: RegisterUserDto) {
       try {
          //#region Check User
          const user = await this.prisma.users.findFirst({
@@ -73,6 +73,7 @@ export class AuthService {
                mobile,
                firstname,
                lastname,
+              nationalCode,
                app_action: 1,
             },
          });
@@ -87,6 +88,7 @@ export class AuthService {
             data: {
                username: mobile,
                password,
+              nationalCode,
                title: `${firstname} ${lastname}`,
                entity: Entity.Personal,
                entity_ref: newUser.id,
@@ -118,14 +120,14 @@ export class AuthService {
       try {
          //#region Check Company
          const company = await this.prisma.companies.findFirst({
-            where: { nationalCode, app_action: 1 },
+            where: { entityType: EntityType.Primary,nationalCode, app_action: 1 },
          });
          if (company) throw new GoneException("این شناسه ملی قبلاً ثبت شده است");
          //#endregion
 
          //#region Check Tenant
          const tenant = await this.prisma.tenants.findFirst({
-            where: { username: nationalCode, app_action: 1 },
+            where: { username: nationalCode, nationalCode: nationalCode, app_action: 1 },
          });
          if (tenant) throw new GoneException("این شرکت قبلاً ثبت شده است");
          //#endregion
@@ -145,6 +147,7 @@ export class AuthService {
          //#region Create Tenant
          const newTenant = await this.prisma.tenants.create({
             data: {
+              nationalCode: nationalCode,
                username: nationalCode,
                password: "123",
                title,
@@ -183,7 +186,6 @@ export class AuthService {
          const tokens = await this.getTokens(_tenant);
          return tokens;
       } catch (e) {
-         console.log(e);
          if (e instanceof GoneException) {
             throw e;
          }
@@ -220,6 +222,7 @@ export class AuthService {
             userID: user.id,
             isPersonal: true,
             userName: tenant.username,
+           nationalCode: tenant.nationalCode,
             title: `${user.firstname} ${user.lastname}`,
             firstName: user.firstname,
             lastName: user.lastname,
@@ -261,11 +264,12 @@ export class AuthService {
                   userID: emp.company.id,
                   isPersonal: false,
                   userName: emp.company.nationalCode,
+                 nationalCode: emp.company.nationalCode,
                   title: emp.company.title,
                   firstName: user.firstname,
                   lastName: user.lastname,
                   avatar: emp.company.logo ? `${process.env.BACKEND_DOMAIN}/dl/${emp.company.logo}` : null,
-                  permissions: ["chat", "priceMonitor", "factor", "product", "contact"],
+                  permissions: ["chat", "priceMonitor", "factor", "product", "contact", "order"],
                };
                const [accessToken, refreshToken] = await Promise.all([
                   this.jwtService.signAsync(payload, {

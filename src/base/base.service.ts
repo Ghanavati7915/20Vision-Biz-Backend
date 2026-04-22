@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CityType, Gender } from 'src/common/enums/enums';
-import { CreateProductDto } from './dto/base.dto';
+import { CreateJobFieldTitleDto, CreateProductDto } from './dto/base.dto';
 
 @Injectable()
 export class BaseService {
@@ -54,6 +54,64 @@ export class BaseService {
             throw e;
          }
          throw new GoneException('مشکلی در ثبت رخ داده است');
+      }
+   }
+   //#endregion
+
+   //#region Update Product
+   async updateProduct(
+      editor: number,
+      payload: CreateProductDto,
+      id: number,
+   ): Promise<{ message: string; statusCode: number }> {
+      try {
+
+         //#region Check Exist
+         const existing = await this.prisma.products.findFirst({
+            where: {
+               id,
+               app_action: 1
+            }
+         });
+         if (!existing) {
+            throw new ConflictException("محصول یافت نشد");
+         }
+         //#endregion
+
+         //#region Check Duplicate
+         const existingTitle = await this.prisma.products.findFirst({
+            where: { id: { not: id }, title: payload.title, app_action: 1 },
+         });
+         if (existingTitle) {
+            throw new NotFoundException('این محصول قبلاً ثبت شده است');
+         }
+         //#endregion
+
+         //#region ویرایش کاربر
+         await this.prisma.products.updateMany({
+            where: { id, app_action: 1 },
+            data: {
+               title: payload.title,
+               description: payload.description,
+               properties: payload.properties,
+               modify_by: editor,
+               modify_at: new Date(),
+            },
+         });
+         //#endregion
+
+         //#region Response
+         return {
+            message: 'ویرایش با موفقیت انجام شد',
+            statusCode: HttpStatus.OK,
+         };
+         //#endregion
+      }
+      catch (e: any) {
+         if (e instanceof ConflictException) {
+            throw e;
+         }
+         throw new GoneException('مشکلی در به روز رسانی رخ داده است');
       }
    }
    //#endregion
@@ -279,6 +337,167 @@ export class BaseService {
    }
 
    //#endregion
+
+  //#region JobFieldTitle
+  //#region Create
+  async create_jobFieldTitle(
+    creator: number,
+    payload: CreateJobFieldTitleDto,
+  ): Promise<{ message: string; statusCode: number }> {
+    try {
+      //#region Check Exist
+      const existing = await this.prisma.jobFieldTitles.findFirst({
+        where: {
+          title: payload.title,
+          app_action: 1,
+        },
+      });
+      if (existing) {
+        throw new ConflictException('این اطلاعات را قبلاً ثبت کرده اید');
+      }
+      //#endregion
+
+      //#region Add Department
+      await this.prisma.jobFieldTitles.create({
+        data: {
+          title: payload.title,
+          description: payload.description,
+          created_by: creator,
+        },
+      });
+      //#endregion
+
+      //#region Response
+      return {
+        message: 'ثبت با موفقیت انجام شد',
+        statusCode: HttpStatus.CREATED,
+      };
+      //#endregion
+    } catch (e: any) {
+      if (e instanceof ConflictException) {
+        throw e;
+      }
+      if (e instanceof NotFoundException) {
+        throw e;
+      }
+      throw new GoneException('مشکلی در ثبت رخ داده است');
+    }
+  }
+  //#endregion
+  //#region Get
+  async jobFieldTitleGetAll() {
+    try {
+      //#region Transaction
+      const result = await this.prisma.jobFieldTitles.findMany({
+        where: { app_action: 1 },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          parent_ref: true,
+        },
+      });
+      //#endregion
+      //#region Response
+      return result;
+      //#endregion
+    } catch (e: any) {
+      if (e instanceof NotFoundException) {
+        throw e;
+      }
+      throw new GoneException('مشکلی در دریافت اطلاعات رخ داده است');
+    }
+  }
+  //#endregion
+  //#region Update
+  async update_jobFieldTitle(
+    editor: number,
+    id: number,
+    payload: CreateJobFieldTitleDto,
+  ): Promise<{ message: string; statusCode: number }> {
+    try {
+      //#region Check Exist
+      const existing = await this.prisma.jobFieldTitles.findFirst({
+        where: {
+          id,
+          app_action: 1,
+        },
+      });
+      if (!existing) {
+        throw new NotFoundException('یافت نشد');
+      }
+      //#endregion
+
+      //#region ویرایش
+      await this.prisma.jobFieldTitles.updateMany({
+        where: { id, app_action: 1 },
+        data: {
+          title: payload.title,
+          description: payload.description,
+          modify_by: editor,
+          modify_at: new Date(),
+        },
+      });
+      //#endregion
+
+      //#region Response
+      return {
+        message: 'ویرایش با موفقیت انجام شد',
+        statusCode: HttpStatus.OK,
+      };
+      //#endregion
+    } catch (e: any) {
+      if (e instanceof NotFoundException) {
+        throw e;
+      }
+      throw new GoneException('مشکلی در ویرایش رخ داده است');
+    }
+  }
+  //#endregion
+  //#region Delete
+  async delete_jobFieldTitle(
+    editor: number,
+    id: number,
+  ): Promise<{ message: string; statusCode: number }> {
+    try {
+      //#region Check Exist
+      const existing = await this.prisma.jobFieldTitles.findFirst({
+        where: {
+          id,
+          app_action: 1,
+        },
+      });
+      if (!existing) {
+        throw new NotFoundException('یافت نشد');
+      } else {
+        //#region حذف
+        await this.prisma.jobFieldTitles.updateMany({
+          where: { id, app_action: 1 },
+          data: {
+            app_action: 0,
+            modify_by: editor,
+            modify_at: new Date(),
+          },
+        });
+        //#endregion
+      }
+      //#endregion
+
+      //#region Response
+      return {
+        message: 'حذف با موفقیت انجام شد',
+        statusCode: HttpStatus.OK,
+      };
+      //#endregion
+    } catch (e: any) {
+      if (e instanceof NotFoundException) {
+        throw e;
+      }
+      throw new GoneException('مشکلی در حذف رخ داده است');
+    }
+  }
+  //#endregion
+  //#endregion
 
    //#region Seed
 

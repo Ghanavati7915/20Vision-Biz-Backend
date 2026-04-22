@@ -40,6 +40,34 @@ export class ContactController {
    }
    //#endregion
 
+  //#region User Update
+  @Patch("user/:id")
+  @ApiOperation({ summary: "ویرایش مخاطب حقیقی" })
+  @ApiResponse({
+    status: 201,
+    description: "User Contact Customer updated successfully",
+  })
+  @ApiResponse({ status: 400, description: "Bad request" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  updateUser(@Request() req: any, @Body() payload: ContactUserDto, @Param("id") id: string) {
+    return this.contactService.updateUser(req.user.id, req.user.userID, payload, +id);
+  }
+  //#endregion
+
+  //#region Company Update
+  @Patch("company/:id")
+  @ApiOperation({ summary: "ویرایش مخاطب حقوقی" })
+  @ApiResponse({
+    status: 201,
+    description: "Company Contact Customer updated successfully",
+  })
+  @ApiResponse({ status: 400, description: "Bad request" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  updateCompany(@Request() req: any, @Body() payload: ContactCompanyDto, @Param("id") id: string) {
+    return this.contactService.updateCompany(req.user.id, req.user.userID, payload, +id);
+  }
+  //#endregion
+
    //#region Toggle Company Customer State
    @Patch("company/toggleCustomer/:id")
    @ApiOperation({ summary: "تغییر وضعیت مشتری بودن/نبودن یک مخاطب حقوقی" })
